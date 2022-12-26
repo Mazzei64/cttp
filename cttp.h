@@ -716,8 +716,206 @@ typedef struct {
 typedef struct {
 
     /*
-        ...
+    Name:
+        Upgrade-Insecure-Requests 
+        
+    Description:
+        Tells a server which (presumably in the middle of a HTTP -> HTTPS migration) hosts mixed content that the client would prefer redirection to HTTPS and can handle Content-Security-Policy: upgrade-insecure-requests.
+        
+        Must not be used with HTTP/2
+    
+    Example:
+        Upgrade-Insecure-Requests: 1
+
     */
+   string upgradeInsecureReqs;
+
+   /*
+    Name:
+        X-Requested-With
+        
+    Description:
+        Mainly used to identify Ajax requests (most JavaScript frameworks send this field with value of XMLHttpRequest); also identifies Android apps using WebView
+    
+    Example:
+        X-Requested-With: XMLHttpRequest
+
+    */
+   string XRequestedWith;
+
+   /*
+    Name:
+        DNT
+        
+    Description:
+        Requests a web application to disable their tracking of a user. This is Mozilla's version of the X-Do-Not-Track header field (since Firefox 4.0 Beta 11). Safari and IE9 also have support for this field. On March 7, 2011, a draft proposal was submitted to IETF. The W3C Tracking Protection Working Group is producing a specification.
+    
+    Example:
+        DNT: 1 (Do Not Track Enabled)
+        DNT: 0 (Do Not Track Disabled) 
+
+    */
+   string dnt;
+
+   /*
+    Name:
+        X-Forwarded-For
+        
+    Description:
+        A de facto standard for identifying the originating IP address of a client connecting to a web server through an HTTP proxy or load balancer. Superseded by Forwarded header.
+    
+    Example:
+        X-Forwarded-For: client1, proxy1, proxy2
+        X-Forwarded-For: 129.78.138.66, 129.78.64.103 
+
+    */
+   string XForwardedFor;
+
+   /*
+    Name:
+        X-Forwarded-Host
+        
+    Description:
+        A de facto standard for identifying the original host requested by the client in the Host HTTP request header, since the host name and/or port of the reverse proxy (load balancer) may differ from the origin server handling the request. Superseded by Forwarded header.
+    
+    Example:
+        X-Forwarded-Host: en.wikipedia.org:8080
+        X-Forwarded-Host: en.wikipedia.org 
+
+    */
+   string XForwardedHost;
+
+   /*
+    Name:
+        X-Forwarded-Proto
+        
+    Description:
+        A de facto standard for identifying the originating protocol of an HTTP request, since a reverse proxy (or a load balancer) may communicate with a web server using HTTP even if the request to the reverse proxy is HTTPS. An alternative form of the header (X-ProxyUser-Ip) is used by Google clients talking to Google servers. Superseded by Forwarded header.
+    
+    Example:
+        X-Forwarded-Proto: https
+
+    */
+   string XForwardedProto;
+
+   /*
+    Name:
+        Front-End-Https
+        
+    Description:
+        Non-standard header field used by Microsoft applications and load-balancers
+    
+    Example:
+        Front-End-Https: on
+
+    */
+   string frontEndHttps;
+
+   /*
+    Name:
+        X-Http-Method-Override
+        
+    Description:
+        Requests a web application to override the method specified in the request (typically POST) with the method given in the header field (typically PUT or DELETE). This can be used when a user agent or firewall prevents PUT or DELETE methods from being sent directly (note that this is either a bug in the software component, which ought to be fixed, or an intentional configuration, in which case bypassing it may be the wrong thing to do).
+    
+    Example:
+        X-HTTP-Method-Override: DELETE
+
+    */
+   string XHttpMethodOverride;
+
+   /*
+    Name:
+        X-ATT-DeviceId
+        
+    Description:
+        Allows easier parsing of the MakeModel/Firmware that is usually found in the User-Agent String of AT&T Devices
+    
+    Example:
+        X-Att-Deviceid: GT-P7320/P7320XXLPG
+
+    */
+   string XAttDeviceld;
+
+   /*
+    Name:
+        X-Wap-Profile
+        
+    Description:
+        Links to an XML file on the Internet with a full description and details about the device currently connecting. In the example to the right is an XML file for an AT&T Samsung Galaxy S2.
+    
+    Example:
+        x-wap-profile: http://wap.samsungmobile.com/uaprof/SGH-I777.xml
+
+    */
+   string XWrapProfile;
+
+   /*
+    Name:
+        Proxy-Connection
+        
+    Description:
+        Implemented as a misunderstanding of the HTTP specifications. Common because of mistakes in implementations of early HTTP versions. Has exactly the same functionality as standard Connection field.
+        
+        Must not be used with HTTP/2.
+    
+    Example:
+        Proxy-Connection: keep-alive
+
+    */
+   string proxyConnection;
+
+   /*
+    Name:
+        X-UIDH
+        
+    Description:
+        Server-side deep packet insertion of a unique ID identifying customers of Verizon Wireless; also known as "perma-cookie" or "supercookie"
+    
+    Example:
+        X-UIDH: ...
+
+    */
+   string Xuidh;
+
+   /*
+    Name:
+        X-Csrf-Token
+        
+    Description:
+        Used to prevent cross-site request forgery. Alternative header names are: X-CSRFToken[40] and X-XSRF-TOKEN
+    
+    Example:
+        X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql
+
+    */
+   string XCsrfToken;
+
+   /*
+    Name:
+        X-Request-ID, X-Correlation-ID, Correlation-ID 
+        
+    Description:
+        Correlates HTTP requests between a client and server.
+    
+    Example:
+        X-Request-ID: f058ebd6-02f7-4d3f-942e-904344e8cde5
+
+    */
+   string XReqID;
+
+   /*
+    Name:
+        Save-Data 
+        
+    Description:
+        The Save-Data client hint request header available in Chrome, Opera, and Yandex browsers lets developers deliver lighter, faster applications to users who opt-in to data saving mode in their browser. 
+    
+    Example:
+        Save-Data: on
+
+    */
+   string XReqID;
 
 } NonStandardRequest;
 
