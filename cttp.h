@@ -1,6 +1,15 @@
 #ifndef _CTPP_H_
 #define _CTPP_H_
 
+/*
+    UNIX System Dependecies.
+*/
+#include<netinet/in.h>
+#include<arpa/inet.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<string.h>
+
 typedef unsigned char byte;
 typedef char* string;
 
@@ -1971,5 +1980,28 @@ typedef struct {
     StandardResponse stres;
     NonStandardResponse nstres;
 } HTTPResponseHeader;
+
+typedef struct {
+    byte* dataStream;
+} RequestBody;
+
+typedef struct {
+    byte* dataStream;
+} ResponseBody;
+
+typedef struct {
+    HTTPRequestHeader reqH;
+    RequestBody reqB;
+} HTTPRequest;
+
+typedef struct {
+    HTTPResponseHeader resH;
+    ResponseBody reqB;
+} HTTPResponse;
+
+extern HTTPResponse* CTTP_GET(HTTPRequest* http_req, string url);
+extern HTTPResponse* CTTP_POST(HTTPRequest* http_req, string url);
+extern HTTPResponse* CTTP_PUT(HTTPRequest* http_req, string url);
+extern HTTPResponse* CTTP_DELETE(HTTPRequest* http_req, string url);
 
 #endif

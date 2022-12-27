@@ -1,0 +1,6 @@
+# local
+.vscode/*
+.vscode/
+
+# tests
+test*
