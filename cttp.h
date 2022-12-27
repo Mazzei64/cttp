@@ -1760,6 +1760,208 @@ typedef struct {
 
 typedef struct {
 
+    /*
+    Name:
+        Content-Security-Policy,
+        X-Content-Security-Policy,
+        X-WebKit-CSP
+        
+    Description:
+        Content Security Policy definition. 
+    
+    Example:
+       X-WebKit-CSP: default-src 'self'
+
+    */
+   string XWebkitCSP;
+
+   /*
+    Name:
+        Expect-CT
+        
+    Description:
+        Notify to prefer to enforce Certificate Transparency. 
+    
+    Example:
+       Expect-CT: max-age=604800, enforce, report-uri="https://example.example/report"
+
+    */
+   string expectCT;
+
+   /*
+    Name:
+        NEL
+        
+    Description:
+        Used to configure network request logging. 
+    
+    Example:
+       NEL: { "report_to": "name_of_reporting_group", "max_age": 12345, "include_subdomains": false, "success_fraction": 0.0, "failure_fraction": 1.0 }
+
+    */
+   string nel;
+
+   /*
+    Name:
+        Permissions-Policy
+        
+    Description:
+        To allow or disable different features or APIs of the browser. 
+    
+    Example:
+       Permissions-Policy: fullscreen=(), camera=(), microphone=(), geolocation=(), interest-cohort=()
+
+    */
+   string permissionsPolicy;
+
+   /*
+    Name:
+        Refresh
+        
+    Description:
+        Used in redirection, or when a new resource has been created. This refresh redirects after 5 seconds. Header extension introduced by Netscape and supported by most web browsers. Defined by HTML Standard 
+    
+    Example:
+       Refresh: 5; url=http://www.w3.org/pub/WWW/People.html
+
+    */
+   string refresh;
+
+   /*
+    Name:
+        Report-To
+        
+    Description:
+        Instructs the user agent to store reporting endpoints for an origin. 
+    
+    Example:
+       Report-To: { "group": "csp-endpoint", "max_age": 10886400, "endpoints": [ { "url": "https-url-of-site-which-collects-reports" } ] }
+
+    */
+   string reportTo;
+
+   /*
+    Name:
+        Status
+        
+    Description:
+        CGI header field specifying the status of the HTTP response. Normal HTTP responses use a separate "Status-Line" instead, defined by RFC 9110. 
+    
+    Example:
+       Status: 200 OK 
+
+    */
+   string status;
+
+   /*
+    Name:
+        Timing-Allow-Origin
+        
+    Description:
+        The Timing-Allow-Origin response header specifies origins that are allowed to see values of attributes retrieved via features of the Resource Timing API, which would otherwise be reported as zero due to cross-origin restrictions. 
+    
+    Example:
+       Timing-Allow-Origin: *
+       Timing-Allow-Origin: <origin>[, <origin>]* 
+
+    */
+   string timingAllowOrigin;
+
+   /*
+    Name:
+        X-Content-Duration
+        
+    Description:
+        Provide the duration of the audio or video in seconds; only supported by Gecko browsers 
+    
+    Example:
+       X-Content-Duration: 42.666 
+
+    */
+   string XContentDuration;
+
+   /*
+    Name:
+        X-Content-Type-Options
+        
+    Description:
+        The only defined value, "nosniff", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type. This also applies to Google Chrome, when downloading extensions. 
+    
+    Example:
+       X-Content-Type-Options: nosniff 
+
+    */
+   string XContentTypeOpts;
+
+   /*
+    Name:
+        X-Powered-By
+        
+    Description:
+        Specifies the technology (e.g. ASP.NET, PHP, JBoss) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version) 
+    
+    Example:
+       X-Powered-By: PHP/5.4.0 
+
+    */
+   string XPoweredBy;
+
+   /*
+    Name:
+        X-Redirect-By
+        
+    Description:
+        Specifies the component that is responsible for a particular redirect.
+    
+    Example:
+      X-Redirect-By: WordPress
+      X-Redirect-By: Polylang 
+
+    */
+   string XRedirectBy;
+
+   /*
+    Name:
+        X-Request-ID, X-Correlation-ID
+        
+    Description:
+        Correlates HTTP requests between a client and server.
+    
+    Example:
+      X-Request-ID: f058ebd6-02f7-4d3f-942e-904344e8cde5 
+
+    */
+   string XReqID;
+
+   /*
+    Name:
+        X-UA-Compatible
+        
+    Description:
+        Recommends the preferred rendering engine (often a backward-compatibility mode) to use to display the content. Also used to activate Chrome Frame in Internet Explorer. In HTML Standard, only the IE=edge value is defined.
+    
+    Example:
+        X-UA-Compatible: IE=edge
+        X-UA-Compatible: IE=EmulateIE7
+        X-UA-Compatible: Chrome=1 
+
+    */
+   string XUACompatible;
+
+   /*
+    Name:
+        X-XSS-Protection
+        
+    Description:
+        Cross-site scripting (XSS) filter
+    
+    Example:
+        X-XSS-Protection: 1; mode=block
+
+    */
+   string XXSSProtection;
+
+
 } NonStandardResponse;
 /*
     Description:
