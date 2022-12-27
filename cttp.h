@@ -928,5 +928,846 @@ typedef struct {
     NonStandardRequest nstrq;
 } HTTPRequestHeader;
 
+typedef struct {
+
+    /*
+    Name:
+        Accept-CH 
+        
+    Description:
+        Requests HTTP Client Hints
+    
+    Example:
+        Accept-CH: UA, Platform
+
+    Status:
+        Experimental
+
+    Standard:
+        RFC 8942 (https://datatracker.ietf.org/doc/html/rfc8942)
+    */
+   string acceptCH;
+
+   /*
+    Name:
+        Accept-CH 
+        
+    Description:
+        Requests HTTP Client Hints
+    
+    Example:
+        Accept-CH: UA, Platform
+
+    Status:
+        Experimental
+
+    Standard:
+        RFC 8942 (https://datatracker.ietf.org/doc/html/rfc8942)
+    */
+   string acceptCH;
+
+   /*
+    Name:
+        Access-Control-Allow-Origin,
+        Access-Control-Allow-Credentials,
+        Access-Control-Expose-Headers,
+        Access-Control-Max-Age,
+        Access-Control-Allow-Methods,
+        Access-Control-Allow-Headers 
+        
+    Description:
+        Specifying which web sites can participate in cross-origin resource sharing
+    
+    Example:
+        Access-Control-Allow-Origin: *
+
+    Status:
+        Permanent: standard
+
+    Standard:
+        RFC 7480 (https://datatracker.ietf.org/doc/html/rfc7480)
+    */
+   string allowInCrossOrigin;
+
+   /*
+    Name:
+        Accept-Patch 
+        
+    Description:
+        Specifies which patch document formats this server supports
+    
+    Example:
+        Accept-Patch: text/example;charset=utf-8
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 5789 (https://datatracker.ietf.org/doc/html/rfc5789)
+    */
+   string acceptPath;
+
+   /*
+    Name:
+        Accept-Ranges 
+        
+    Description:
+        What partial content range types this server supports via byte serving
+    
+    Example:
+        Accept-Ranges: bytes
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string acceptRanges;
+
+   /*
+    Name:
+        Age 
+        
+    Description:
+        The age the object has been in a proxy cache in seconds
+    
+    Example:
+        Age: 12
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9111 (https://datatracker.ietf.org/doc/html/rfc9111)
+    */
+   string age;
+
+   /*
+    Name:
+        Allow 
+        
+    Description:
+        Valid methods for a specified resource. To be used for a 405 Method not allowed
+    
+    Example:
+        Allow: GET, HEAD
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9111 (https://datatracker.ietf.org/doc/html/rfc9111)
+    */
+   string allow;
+
+   /*
+    Name:
+        Alt-Svc 
+        
+    Description:
+        A server uses "Alt-Svc" header (meaning Alternative Services) to indicate that its resources can also be accessed at a different network location (host or port) or using a different protocol
+        
+        When using HTTP/2, servers should instead send an ALTSVC frame.
+    
+    Example:
+        Alt-Svc: http/1.1="http2.example.com:8001"; ma=7200
+
+    Status:
+        Permanent
+
+    Standard:
+        
+    */
+   string altSvc;
+
+   /*
+    Name:
+        Cache-Control
+        
+    Description:
+        Control options for the current connection and list of hop-by-hop response fields.
+        
+        Must not be used with HTTP/2.
+    
+    Example:
+        Connection: close
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string cacheCtrl;
+
+   /*
+    Name:
+        Content-Disposition
+        
+    Description:
+        An opportunity to raise a "File Download" dialogue box for a known MIME type with binary format or suggest a filename for dynamic content. Quotes are necessary with special characters.
+    
+    Example:
+        Content-Disposition: attachment; filename="fname.ext"
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 2616 (https://datatracker.ietf.org/doc/html/rfc2616)
+        RFC 4021 (https://datatracker.ietf.org/doc/html/rfc4021)
+        RFC 6266 (https://datatracker.ietf.org/doc/html/rfc6266)
+        
+    */
+   string contentDisposition;
+
+   /*
+    Name:
+        Content-Encoding
+        
+    Description:
+        The type of encoding used on the data. See HTTP compression.
+    
+    Example:
+        Content-Encoding: gzip
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string contentEncoding;
+
+   /*
+    Name:
+        Content-Language
+        
+    Description:
+        The natural language or languages of the intended audience for the enclosed content
+    
+    Example:
+        Content-Language: da
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string contentLanguage;
+
+   /*
+    Name:
+        Content-Length
+        
+    Description:
+        The length of the response body in octets (8-bit bytes)
+    
+    Example:
+        Content-Length: 348
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string contentLen;
+
+   /*
+    Name:
+        Content-Location
+        
+    Description:
+        An alternate location for the returned data
+    
+    Example:
+        Content-Location: /index.htm
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string contentLen;
+
+   /*
+    Name:
+        Content-MD5
+        
+    Description:
+        A Base64-encoded binary MD5 sum of the content of the request body.
+    
+    Example:
+        Content-MD5: Q2hlY2sgSW50ZWdyaXR5IQ==
+
+    Status:
+        Obsolete
+
+    Standard:
+        RFC 1544 (https://datatracker.ietf.org/doc/html/rfc1544)
+        RFC 1864 (https://datatracker.ietf.org/doc/html/rfc1864)
+        RFC 4021 (https://datatracker.ietf.org/doc/html/rfc4021)
+    */
+   string contentMD5;
+
+    /*
+    Name:
+        Content-Range
+        
+    Description:
+        Where in a full body message this partial message belongs
+    
+    Example:
+        Content-Range: bytes 21010-47021/47022
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string contentRange;
+
+   /*
+    Name:
+        Content-Type
+        
+    Description:
+        The MIME type of this content
+    
+    Example:
+        Content-Type: application/x-www-form-urlencoded
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string contentType;
+
+   /*
+    Name:
+        Date
+        
+    Description:
+        The date and time that the message was sent (in "HTTP-date" format as defined by RFC 9110)
+    
+    Example:
+        Date: Tue, 15 Nov 1994 08:12:31 GMT
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string date;
+
+   /*
+    Name:
+        Delta-Base
+        
+    Description:
+        Specifies the delta-encoding entity tag of the response.
+    
+    Example:
+        Delta-Base: "abc"
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 3229 (https://datatracker.ietf.org/doc/html/rfc3229)
+    */
+   string deltaBase;
+
+   /*
+    Name:
+        ETag
+        
+    Description:
+        An identifier for a specific version of a resource, often a message digest
+    
+    Example:
+        ETag: "737060cd8c284d8af7ad3082f209582d"
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string eTag;
+
+   /*
+    Name:
+        Expires
+        
+    Description:
+        Gives the date/time after which the response is considered stale (in "HTTP-date" format as defined by RFC 9110)
+    
+    Example:
+        Expires: Thu, 01 Dec 1994 16:00:00 GMT
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9111 (https://datatracker.ietf.org/doc/html/rfc9111)
+    */
+   string expires;
+
+   /*
+    Name:
+        IM
+        
+    Description:
+        Instance-manipulations applied to the response.
+    
+    Example:
+        IM: feed
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 3229 (https://datatracker.ietf.org/doc/html/rfc3229)
+    */
+   string im;
+
+   /*
+    Name:
+        Last-Modified
+        
+    Description:
+        The last modified date for the requested object (in "HTTP-date" format as defined by RFC 9110)
+    
+    Example:
+        Last-Modified: Tue, 15 Nov 1994 12:45:26 GMT
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string lastModified;
+
+   /*
+    Name:
+        Link
+        
+    Description:
+        Used to express a typed relationship with another resource, where the relation type is defined by RFC 5988
+    
+    Example:
+        Link: </feed>; rel="alternate"
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 5988 (https://datatracker.ietf.org/doc/html/rfc5988)
+    */
+   string link;
+
+   /*
+    Name:
+        Location
+        
+    Description:
+        Used in redirection, or when a new resource has been created.
+    
+    Example:
+        Example 1: Location: http://www.w3.org/pub/WWW/People.html
+        Example 2: Location: /pub/WWW/People.html
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+    */
+   string location;
+
+   /*
+    Name:
+        P3P
+        
+    Description:
+        This field is supposed to set P3P policy, in the form of P3P:CP="your_compact_policy". However, P3P did not take off, most browsers have never fully implemented it, a lot of websites set this field with fake policy text, that was enough to fool browsers the existence of P3P policy and grant permissions for third party cookies.
+    
+    Example:
+        P3P: CP="This is not a P3P policy! See https://en.wikipedia.org/wiki/Special:CentralAutoLogin/P3P for more info."
+
+    Status:
+        Permanent
+
+    Standard:
+        
+    */
+   string p3p;
+
+   /*
+    Name:
+        Pragma
+        
+    Description:
+        Implementation-specific fields that may have various effects anywhere along the request-response chain.
+    
+    Example:
+        Pragma: no-cache
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9111 (https://datatracker.ietf.org/doc/html/rfc9111)
+        
+    */
+   string pragma;
+
+   /*
+    Name:
+        Preference-Applied 
+        
+    Description:
+        Indicates which Prefer tokens were honored by the server and applied to the processing of the request.
+    
+    Example:
+        Preference-Applied: return=representation
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 7240 (https://datatracker.ietf.org/doc/html/rfc7240)
+        
+    */
+   string preferenceApplied;
+
+   /*
+    Name:
+        Proxy-Authenticate 
+        
+    Description:
+        Request authentication to access the proxy.
+    
+    Example:
+        Proxy-Authenticate: Basic
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string proxyAuth;
+
+   /*
+    Name:
+        Public-Key-Pins
+        
+    Description:
+        HTTP Public Key Pinning, announces hash of website's authentic TLS certificate
+    
+    Example:
+        Public-Key-Pins: max-age=2592000; pin-sha256="E9CZ9INDbd+2eRQozYqqbQ2yXLVKB9+xcprMF+44U1g=";
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 7469 (https://datatracker.ietf.org/doc/html/rfc7469)
+        
+    */
+   string publicKeyPins;
+
+   /*
+    Name:
+        Retry-After
+        
+    Description:
+        If an entity is temporarily unavailable, this instructs the client to try again later. Value could be a specified period of time (in seconds) or a HTTP-date.
+    
+    Example:
+        Example 1: Retry-After: 120
+        Example 2: Retry-After: Fri, 07 Nov 2014 23:59:59 GMT
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string retryAfter;
+
+   /*
+    Name:
+        Server
+        
+    Description:
+        A name for the server
+    
+    Example:
+        Server: Apache/2.4.1 (Unix)
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string server;
+
+   /*
+    Name:
+        Set-Cookie
+        
+    Description:
+        An HTTP cookie
+    
+    Example:
+        Set-Cookie: UserID=JohnDoe; Max-Age=3600; Version=1
+
+    Status:
+        Permanent: standard
+
+    Standard:
+        RFC 6265 (https://datatracker.ietf.org/doc/html/rfc6265)
+        
+    */
+   string setCookie;
+
+   /*
+    Name:
+        Strict-Transport-Security
+        
+    Description:
+        A HSTS Policy informing the HTTP client how long to cache the HTTPS only policy and whether this applies to subdomains.
+    
+    Example:
+        Strict-Transport-Security: max-age=16070400; includeSubDomains
+
+    Status:
+        Permanent: standard
+
+    Standard:
+        
+    */
+   string hsts;
+
+   /*
+    Name:
+        Trailer
+        
+    Description:
+        The Trailer general field value indicates that the given set of header fields is present in the trailer of a message encoded with chunked transfer coding.
+    
+    Example:
+        Trailer: Max-Forwards
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string trailer;
+
+   /*
+    Name:
+        Transfer-Encoding
+        
+    Description:
+        The form of encoding used to safely transfer the entity to the user. Currently defined methods are: chunked, compress, deflate, gzip, identity.
+        
+        Must not be used with HTTP/2.
+    
+    Example:
+        Transfer-Encoding: chunked
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string transferEncoding;
+
+   /*
+    Name:
+        Tk
+        
+    Description:
+        Tracking Status header, value suggested to be sent in response to a DNT(do-not-track), possible values:
+
+        "!" — under construction
+        "?" — dynamic
+        "G" — gateway to multiple parties
+        "N" — not tracking
+        "T" — tracking
+        "C" — tracking with consent
+        "P" — tracking only if consented
+        "D" — disregarding DNT
+        "U" — updated
+    
+    Example:
+        Tk: ?
+
+    Status:
+        Permanent
+
+    Standard:
+        
+    */
+   string tk;
+
+   /*
+    Name:
+        Upgrade
+        
+    Description:
+        Ask the client to upgrade to another protocol.
+        
+        Must not be used in HTTP/2
+    
+    Example:
+        Upgrade: h2c, HTTPS/1.3, IRC/6.9, RTA/x11, websocket
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string upgrade;
+
+   /*
+    Name:
+        Vary
+        
+    Description:
+        Tells downstream proxies how to match future request headers to decide whether the cached response can be used rather than requesting a fresh one from the origin server.
+    
+    Example:
+        Example 1: Vary: *
+        Example 2: Vary: Accept-Language
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string vary;
+
+    /*
+    Name:
+        Via
+        
+    Description:
+        Informs the client of proxies through which the response was sent.
+    
+    Example:
+        Via: 1.0 fred, 1.1 example.com (Apache/1.1)
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string via;
+
+   /*
+    Name:
+        Warning
+        
+    Description:
+        A general warning about possible problems with the entity body.
+    
+    Example:
+        Warning: 199 Miscellaneous warning
+
+    Status:
+        Obsolete
+
+    Standard:
+        RFC 7234 (https://datatracker.ietf.org/doc/html/rfc7234)
+        RFC 9111 (https://datatracker.ietf.org/doc/html/rfc9111)
+        
+    */
+   string warning;
+
+   /*
+    Name:
+        WWW-Authenticate
+        
+    Description:
+        Indicates the authentication scheme that should be used to access the requested entity.
+    
+    Example:
+       WWW-Authenticate: Basic
+
+    Status:
+        Permanent
+
+    Standard:
+        RFC 9110 (https://datatracker.ietf.org/doc/html/rfc9110)
+        
+    */
+   string wwwAuth;
+
+   /*
+    Name:
+        X-Frame-Options
+        
+    Description:
+        Clickjacking protection: deny - no rendering within a frame, sameorigin - no rendering if origin mismatch, allow-from - allow from specified location, allowall - non-standard, allow from any location
+    
+    Example:
+       X-Frame-Options: deny
+
+    Status:
+        Obsolete
+
+    Standard:
+        
+    */
+   string XframeOpts;
+   
+
+} StandardResponse;
+
+typedef struct {
+
+} NonStandardResponse;
+/*
+    Description:
+        Main struct for formatting the HTTP Header for HTTP responses, following the pre-requisited documented standards necessary.
+*/
+typedef struct {
+    StandardResponse stres;
+    NonStandardResponse nstres;
+} HTTPResponseHeader;
 
 #endif
