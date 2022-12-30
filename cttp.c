@@ -29,7 +29,6 @@ string CTTP_DELETE(OptionList* opts, URL* url, Data* data) {
 }
 
 string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method){
-    const unsigned int RECV_MSG_LEN = 2048;
     string statusLine = SetStatusLine(method, url);
     string headerStr = SetHeader(opts);
     unsigned int reqLen = 0;
@@ -44,14 +43,14 @@ string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method){
     strcat(request, headerStr);
     if(data != NULL) strcat(request, (string)data->data);
 
-    string msgReturn = (string)calloc(RECV_MSG_LEN, sizeof(char));
+    string msgReturn = (string)calloc(RES_BUFFER_LEN, sizeof(char));
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(url->port);
     addr.sin_addr.s_addr = inet_addr(url->address);
     // set timeout.
-    int talkRet = talk(sockfd, &addr, (const char*)request, msgReturn, reqLen, RECV_MSG_LEN);
+    int talkRet = talk(sockfd, &addr, (const char*)request, msgReturn, reqLen, RES_BUFFER_LEN);
     if(talkRet == -1) {
         printf("[LOG]Connection failed...\n");
         return NULL;

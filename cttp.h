@@ -14,6 +14,9 @@
 
 #define getVar(var) #var
 
+#define SET_RES_BUFFER_LEN(new_len) response_buffer_len = new_len
+#define RES_BUFFER_LEN response_buffer_len
+
 typedef unsigned char byte;
 typedef char* string;
 
@@ -55,6 +58,6 @@ extern void AddOption(OptionList* optlst, Option* opt);
 
 extern Data* NewData(const byte* data);
 
-// extern void itoa(const string, int* dest);
+static unsigned long int response_buffer_len = 2048;
 
 #endif
