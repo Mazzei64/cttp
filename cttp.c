@@ -9,50 +9,26 @@ static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, 
 static const char* REQ_HEADER = "POST /auth/authenticate HTTP/1.1\nHost: localhost:8090\nAccept: */*,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nConnection: keep-alive\n\n{\"userName\":\"5597803327979\",\"password\":\"1896@$!Agija@$!ad\"}";
 
 string CTTP_GET(OptionList* opts, URL* url, Data* data) {
-    const string method = "GET";
-    const unsigned int RECV_MSG_LEN = 2048;
-    string statusLine = SetStatusLine(method, url);
-    string headerStr = SetHeader(opts);
-    unsigned int reqLen = 0;
-    if(data != NULL)
-       reqLen = strlen(statusLine) + strlen(headerStr) + data->dataLen;
-    else
-        reqLen = strlen(statusLine) + strlen(headerStr);
-
-    char request[reqLen];
-    memset(request, 0x00, reqLen);
-    strcat(request, statusLine);
-    strcat(request, headerStr);
-    if(data != NULL) strcat(request, (string)data->data);
-
-    char msgReturn[RECV_MSG_LEN];
-    memset(msgReturn, 0x00, RECV_MSG_LEN);
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(url->port);
-    addr.sin_addr.s_addr = inet_addr(url->address);
-
-    int talkRet = talk(sockfd, &addr, request, msgReturn, reqLen, RECV_MSG_LEN);
-    if(talkRet == -1) {
-        printf("[LOG]Connection failed...\n");
-        return NULL;
-    }else if (talkRet == -2) {
-        printf("[LOG]Failed to send message...\n");
-        return NULL;
-    }else if (talkRet == -3) {
-        printf("[LOG]Failed to read message...\n");
-        return NULL;
-    }
-    
-    printf("[LOG]Message returned is: %s\n", msgReturn);
-    free(statusLine);
-    free(headerStr);
-    return NULL;
+    static const string method = "GET";
+    return CTTP_REQ(opts, url, data, method);
 }
 
 string CTTP_POST(OptionList* opts, URL* url, Data* data) {
-    const string method = "POST";
+    static const string method = "POST";
+    return CTTP_REQ(opts, url, data, method);
+}
+
+string CTTP_PUT(OptionList* opts, URL* url, Data* data) {
+    static const string method = "PUT";
+    return CTTP_REQ(opts, url, data, method);
+}
+
+string CTTP_DELETE(OptionList* opts, URL* url, Data* data) {
+    static const string method = "DELETE";
+    return CTTP_REQ(opts, url, data, method);
+}
+
+string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method){
     const unsigned int RECV_MSG_LEN = 2048;
     string statusLine = SetStatusLine(method, url);
     string headerStr = SetHeader(opts);
@@ -91,7 +67,6 @@ string CTTP_POST(OptionList* opts, URL* url, Data* data) {
     free(headerStr);
     return msgReturn;
 }
-
 void AddOption(OptionList* optlst, Option* opt) {
     if(optlst->count == optlst->size)
         optlst->opts = (Option**)realloc(optlst->opts, sizeof(Option*) * (optlst->size + 8));
@@ -113,7 +88,7 @@ Data* NewData(const byte* data) {
     return dt;
 }
 static string SetStatusLine(const string method, URL* url){
-    short statusLineLen = 4 + strlen(url->route) + 10;
+    short statusLineLen = strlen(method) + 1 + strlen(url->route) + 10;
     string statusLine = (string)malloc(sizeof(char) * statusLineLen);
     memset(statusLine, 0x00, statusLineLen);
     strcat(statusLine, method);
