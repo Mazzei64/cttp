@@ -1,12 +1,10 @@
 #include"cttp.h"
 
-static const char* TEST_REQ = "POST /auth/authenticate HTTP/1.1\nHost: localhost\nAccept: */*,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nContent-Type: application/json\nContent-Length: 59\nConnection: keep-alive\n\n{\"userName\":\"5597803327979\",\"password\":\"1896@$!Agija@$!ad\"}";
+static bool timeout = false;
 
 static string SetStatusLine(const string method, URL* url);
 static string SetHeader(OptionList* opts);
 static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, char *restrict recvMsg,  int sendLen, int recvLen);
-
-static const char* REQ_HEADER = "POST /auth/authenticate HTTP/1.1\nHost: localhost:8090\nAccept: */*,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate, br\nConnection: keep-alive\n\n{\"userName\":\"5597803327979\",\"password\":\"1896@$!Agija@$!ad\"}";
 
 string CTTP_GET(OptionList* opts, URL* url, Data* data) {
     static const string method = "GET";
@@ -49,19 +47,39 @@ string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method){
     addr.sin_family = AF_INET;
     addr.sin_port = htons(url->port);
     addr.sin_addr.s_addr = inet_addr(url->address);
-    // set timeout.
+    
     int talkRet = talk(sockfd, &addr, (const char*)request, msgReturn, reqLen, RES_BUFFER_LEN);
     if(talkRet == -1) {
-        printf("[LOG]Connection failed...\n");
-        return NULL;
+        const string connection_timeout_msg = "Connection failed...\n";
+        printf("[LOG]%s", connection_timeout_msg);
+        strcpy(msgReturn, connection_timeout_msg);
+        return msgReturn;
     }else if (talkRet == -2) {
-        printf("[LOG]Failed to send message...\n");
-        return NULL;
+        const string connection_timeout_msg = "Failed to send message...\n";
+        printf("[LOG]%s", connection_timeout_msg);
+        strcpy(msgReturn, connection_timeout_msg);
+        return msgReturn;
     }else if (talkRet == -3) {
-        printf("[LOG]Failed to read message...\n");
-        return NULL;
-    }
-    
+        const string connection_timeout_msg = "Failed to read message...\n";
+        printf("[LOG]%s", connection_timeout_msg);
+        strcpy(msgReturn, connection_timeout_msg);
+        return msgReturn;
+    }else if (talkRet == -4) {
+        const string connection_timeout_msg = "Connection timeout...\n";
+        printf("[LOG]%s", connection_timeout_msg);
+        strcpy(msgReturn, connection_timeout_msg);
+        return msgReturn;
+    }else if (talkRet == -5) {
+        const string connection_timeout_msg = "Request timeout...\n";
+        printf("[LOG]%s", connection_timeout_msg);
+        strcpy(msgReturn, connection_timeout_msg);
+        return msgReturn;
+    }else if (talkRet == -6) {
+        const string connection_timeout_msg = "[LOG]Response timeout...\n";
+        printf("[LOG]%s", connection_timeout_msg);
+        strcpy(msgReturn, connection_timeout_msg);
+        return msgReturn;
+    }   
     free(statusLine);
     free(headerStr);
     return msgReturn;
@@ -86,6 +104,8 @@ Data* NewData(const byte* data) {
     dt->dataLen = dataLen;
     return dt;
 }
+
+/* Auxiliary Functions */
 static string SetStatusLine(const string method, URL* url){
     short statusLineLen = strlen(method) + 1 + strlen(url->route) + 10;
     string statusLine = (string)malloc(sizeof(char) * statusLineLen);
@@ -115,15 +135,48 @@ static string SetHeader(OptionList* opts) {
     strcat(headerStr, "\n");
     return headerStr;
 }
+static void TimeOut(int sig) {
+    timeout = true;
+}
 static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, char *restrict recvMsg,  int sendLen, int recvLen) {
+    struct itimerval timer, oldtimer;
+    struct sigaction handler;
+    memset(&timer, 0x00, sizeof(struct itimerval));
+    memset(&oldtimer, 0x00, sizeof(struct itimerval));
+    memset(&handler, 0x00, sizeof(struct sigaction));
+    handler.sa_handler = TimeOut;
+    handler.sa_flags = 0;
+    sigfillset(&handler.sa_mask);
+    sigaction(SIGALRM, &handler, 0);
+    timer.it_value.tv_sec = CONNECTION_TIMEOUT;
+    timer.it_value.tv_usec = CONNECTION_TIMEOUT_MS;
+    printf("[LOG]Attempting connnection with: %s\n", inet_ntoa(addr->sin_addr));
+    setitimer(ITIMER_REAL, &timer, &oldtimer);
     int connected;
-    if((connected = connect(sockfd, (const struct sockaddr*)addr, (socklen_t)sizeof(struct sockaddr_in))) == -1) return -1;
-    printf("[LOG]Connection was a success...\n");
+    if((connected = connect(sockfd, (const struct sockaddr*)addr, (socklen_t)sizeof(struct sockaddr_in))) == -1) {
+        if(timeout == true) return -4;
+        return -1;
+    }
+    printf("[LOG]Connection established with success.\n");
+    setitimer(ITIMER_REAL, &oldtimer, NULL);
+    timer.it_value.tv_sec = MSG_SEND_TIMEOUT;
+    timer.it_value.tv_usec = MSG_SEND_TIMEOUT_MS;
+    setitimer(ITIMER_REAL, &timer, &oldtimer);
     int sendBytes = 0;
-    int len = strlen(TEST_REQ);
-    if((sendBytes = send(sockfd, sendMsg, sendLen, 0)) < sendLen) return -2;
+    if((sendBytes = send(sockfd, sendMsg, sendLen, 0)) < sendLen) {
+        if(timeout == true) return -5;
+        return -2;
+    }
     printf("[LOG]Message sent with num of bytes: %d\n", sendBytes);
+    setitimer(ITIMER_REAL, &oldtimer, NULL);
+    timer.it_value.tv_sec = MSG_RECV_TIMEOUT;
+    timer.it_value.tv_usec = MSG_RECV_TIMEOUT_MS;
+    setitimer(ITIMER_REAL, &timer, &oldtimer);
     int readBytes = 0;
-    if(read(sockfd, recvMsg, recvLen) <= 0) return -3;
+    if(read(sockfd, recvMsg, recvLen) <= 0) {
+        if(timeout == true) return -6;
+        return -3;
+    }
+    setitimer(ITIMER_REAL, &oldtimer, NULL);
     return 0;
 }

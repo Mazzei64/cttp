@@ -9,13 +9,28 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<unistd.h>
+#include<signal.h>
 #include<sys/socket.h>
+#include<sys/time.h>
 #include<string.h>
 
 #define getVar(var) #var
-
 #define SET_RES_BUFFER_LEN(new_len) response_buffer_len = new_len
 #define RES_BUFFER_LEN response_buffer_len
+#define SET_CONNECTION_TIMEOUT(timeout) connection_timeout_seconds = timeout
+#define SET_CONNECTION_TIMEOUT_MS(timeout) connection_timeout_microseconds = timeout
+#define CONNECTION_TIMEOUT connection_timeout_seconds
+#define CONNECTION_TIMEOUT_MS connection_timeout_microseconds
+
+#define SET_MSG_SEND_TIMEOUT(timeout)  msg_send_timeout_seconds = timeout
+#define SET_MSG_SEND_TIMEOUT_MS(timeout) msg_send_timeout_microseconds = timeout
+#define MSG_SEND_TIMEOUT msg_send_timeout_seconds
+#define MSG_SEND_TIMEOUT_MS msg_send_timeout_microseconds
+
+#define SET_MSG_RECV_TIMEOUT(timeout)  msg_recv_timeout_seconds = timeout
+#define SET_MSG_RECV_TIMEOUT_MS(timeout) msg_recv_timeout_microseconds = timeout
+#define MSG_RECV_TIMEOUT msg_recv_timeout_seconds
+#define MSG_RECV_TIMEOUT_MS msg_recv_timeout_microseconds
 
 typedef unsigned char byte;
 typedef char* string;
@@ -58,6 +73,13 @@ extern void AddOption(OptionList* optlst, Option* opt);
 
 extern Data* NewData(const byte* data);
 
-static unsigned long int response_buffer_len = 2048;
+static unsigned long int response_buffer_len = 2048000;
+
+static unsigned short connection_timeout_seconds = 5;
+static unsigned int connection_timeout_microseconds = 0;
+static unsigned short msg_send_timeout_seconds = 5;
+static unsigned int msg_send_timeout_microseconds = 0;
+static unsigned short msg_recv_timeout_seconds = 5;
+static unsigned int msg_recv_timeout_microseconds = 0;
 
 #endif
