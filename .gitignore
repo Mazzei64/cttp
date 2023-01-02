@@ -1,6 +1,7 @@
 # local
 .vscode/*
 .vscode/
+Makefile
 
 # tests
 test*

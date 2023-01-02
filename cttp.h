@@ -88,10 +88,20 @@ typedef struct {
 } Data;
 
 /*
+    TEST
+*/
+typedef struct {
+    string statusLine;
+    OptionList* responseHeader;
+    Data* body;
+    string raw;
+    unsigned int resLen;
+} Response;
+/*
     Wrapper methods that call CTTP_REQ
 */
 extern string CTTP_GET(OptionList* opts, URL* url, Data* data);
-extern string CTTP_POST(OptionList* opts, URL* url, Data* data);
+extern Response* CTTP_POST(OptionList* opts, URL* url, Data* data, int flag);
 extern string CTTP_PUT(OptionList* opts, URL* url, Data* data);
 extern string CTTP_DELETE(OptionList* opts, URL* url, Data* data);
 /*

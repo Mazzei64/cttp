@@ -10,10 +10,85 @@ string CTTP_GET(OptionList* opts, URL* url, Data* data) {
     static const string method = "GET";
     return CTTP_REQ(opts, url, data, method);
 }
-
-string CTTP_POST(OptionList* opts, URL* url, Data* data) {
+static void EncodeStatusLine(string* statusLine, string response, int* count) {
+    while (response[*count] != '\n') (*count)++;
+    (*count)++;
+    (*statusLine) = (string)malloc(sizeof(char) * (*count));
+    for (short i = 0; i < *count; i++)
+        (*statusLine)[i] = response[i];
+}
+static void StringToOption(Option** opt, string optStr) {
+    int count = 0, bufferIndex = 0;
+    (*opt)->name = (string)calloc(24, sizeof(char));
+    while (optStr[count] != ':') {
+        (*opt)->name[bufferIndex] = optStr[count];
+        bufferIndex++;
+        count++;
+    }
+    count+=2;
+    bufferIndex = 0;
+    (*opt)->arg = (string)calloc(512, sizeof(char));
+    while (optStr[count] != '\n') {
+        (*opt)->arg[bufferIndex] = optStr[count];
+        bufferIndex++;
+        count++;
+    }   
+}
+static void EncodeResHeader(OptionList** optLst, string response, int* count) {
+    int lineLen = 0;
+    char headerOptBuffer[1024];
+    memset(headerOptBuffer, 0x00, 1024);
+    *optLst = (OptionList*)calloc(1, sizeof(OptionList));
+    for(;;){
+        while (response[*count] != '\n') {
+            headerOptBuffer[lineLen] = response[*count];
+            lineLen++;
+            (*count)++;
+        }
+        headerOptBuffer[lineLen] = response[*count];
+        (*count)++;
+        Option* option = (Option*)malloc(sizeof(Option));
+        StringToOption(&option, headerOptBuffer);
+        AddOption(*optLst, option);
+        memset(headerOptBuffer, 0x00, 1024);
+        if(*count == '\n' || (*count == '\r' && *(count + 1) == '\n')) {
+            (*count)++;
+            break;
+        }
+        lineLen = 0;
+    }
+}
+static void EncodeBody(Data* body, string response, int* count) {
+    int dataIndex = 0, dataSize = 1024;
+    body = (Data*)calloc(1, sizeof(Data));
+    body->data = (byte*)calloc(dataSize, sizeof(char));
+    while (response[*count] != '\0') {
+        body->data[dataIndex] = response[*count];
+        dataIndex++;
+        (*count)++;
+        if(dataIndex + 1 == dataSize) {
+            body->data = (byte)realloc(body->data, dataSize * 2);
+            dataSize *= 2;
+        }
+    }
+}
+static Response* EncodeResponse(string response, int flag) {
+    int count = 0;
+    if(flag == 0){
+        Response* res = (Response*)calloc(1, sizeof(Response));
+        EncodeStatusLine(&res->statusLine, response, &count);
+        EncodeResHeader(&res->responseHeader, response, &count);
+        EncodeBody(&res->body, response, &count);
+        res->raw = (string)malloc(sizeof(char) * count);
+        strncpy(res->raw, response, count);
+        res->resLen = count + 1;
+    }
+} 
+Response* CTTP_POST(OptionList* opts, URL* url, Data* data, int flag) {
     static const string method = "POST";
-    return CTTP_REQ(opts, url, data, method);
+    string response = CTTP_REQ(opts, url, data, method);
+    //verify if connection either failed or timeoutted
+    return EncodeResponse(response, flag);
 }
 
 string CTTP_PUT(OptionList* opts, URL* url, Data* data) {
