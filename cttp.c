@@ -11,7 +11,7 @@ static string SetStatusLine(const string method, URL* url);
 static string SetHeader(OptionList* opts);
 static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, char *restrict recvMsg,  int sendLen, int recvLen);
 
-Response* CTTP_GET(OptionList* opts, URL* url, Data* data, int falg) {
+Response* CTTP_GET(OptionList* opts, URL* url, Data* data, int flag) {
     static const string method = "GET";
     string response = CTTP_REQ(opts, url, data, method);
     return EncodeResponse(response, flag);
@@ -21,7 +21,6 @@ Response* CTTP_POST(OptionList* opts, URL* url, Data* data, int flag) {
     string response = CTTP_REQ(opts, url, data, method);
     return EncodeResponse(response, flag);
 }
-
 Response* CTTP_PUT(OptionList* opts, URL* url, Data* data, int flag) {
     static const string method = "PUT";
     string response = CTTP_REQ(opts, url, data, method);
@@ -112,6 +111,13 @@ Data* NewData(const byte* data) {
     dt->dataLen = dataLen;
     return dt;
 }
+void DataDestructor(Data** data) {
+    memset((*data)->data, 0x00, (*data)->dataLen);
+    free((*data)->data);
+    memset(*data, 0x00, sizeof(Data));
+    free(*data);
+    (*data) = NULL;
+}
 /* Auxiliary Functions */
 static void EncodeStatusLine(string* statusLine, string response, int* count) {
     while (response[*count] != '\n') (*count)++;
@@ -175,6 +181,7 @@ static void EncodeBody(Data** body, string response, int* count) {
             dataSize *= 2;
         }
     }
+    (*body)->dataLen = dataIndex + 1;
 }
 static Response* EncodeResponse(string response, int flag) {
     int count = 0;
