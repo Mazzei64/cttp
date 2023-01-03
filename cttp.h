@@ -107,6 +107,7 @@ extern Response* CTTP_GET(OptionList* opts, URL* url, Data* data, int flag);
 extern Response* CTTP_POST(OptionList* opts, URL* url, Data* data, int flag);
 extern Response* CTTP_PUT(OptionList* opts, URL* url, Data* data, int flag);
 extern Response* CTTP_DELETE(OptionList* opts, URL* url, Data* data, int flag);
+
 /*
     Main method designed to establish a TCP connection and sending and receiving messages through the HTTP standard.
 */
@@ -130,6 +131,11 @@ extern void OptionListDestructor(OptionList** optLst);
     OptionList method meant for adding a new Option object to the list.
 */
 extern void AddOption(OptionList* optlst, Option* opt);
+
+/*
+    OptionList method meant for adding a Option Array of Option objects to the list.
+*/
+extern void AddOptions(OptionList* optlst, Option* optsArray, int count);
 
 /*
     Constructor method for creating an object of the type Data.

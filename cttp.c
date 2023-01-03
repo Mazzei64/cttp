@@ -26,7 +26,6 @@ Response* CTTP_PUT(OptionList* opts, URL* url, Data* data, int flag) {
     string response = CTTP_REQ(opts, url, data, method);
     return EncodeResponse(response, flag);
 }
-
 Response* CTTP_DELETE(OptionList* opts, URL* url, Data* data, int flag) {
     static const string method = "DELETE";
     string response = CTTP_REQ(opts, url, data, method);
@@ -118,6 +117,11 @@ void AddOption(OptionList* optlst, Option* opt) {
     optlst->opts[optlst->count] = opt;
     optlst->count = optlst->count + 1;   
 }
+void AddOptions(OptionList* optlst, Option* optsArray, int count) {
+    for (size_t i = 0; i < count; i++) {
+        AddOption(optlst, &optsArray[i]);
+    }
+}
 OptionList* NewOptionList() {
     OptionList* optlst = (OptionList*)calloc(1, sizeof(OptionList));
     optlst->opts = (Option**)calloc(8, sizeof(Option*));
@@ -126,11 +130,14 @@ OptionList* NewOptionList() {
 }
 void OptionListDestructor(OptionList** optLst) {
     if(*optLst == NULL) return;
+    register unsigned long int _rsp asm ("rsp");
     for (size_t i = 0; i < (*optLst)->count; i++) {
-        free((*optLst)->opts[i]->name);
-        free((*optLst)->opts[i]->arg);
-        free((*optLst)->opts[i]);
-        (*optLst)->opts[i] = NULL;
+        if((unsigned long int)(((*optLst)->opts[i])) < _rsp) {
+            free((*optLst)->opts[i]->name);
+            free((*optLst)->opts[i]->arg);
+            free((*optLst)->opts[i]);
+            (*optLst)->opts[i] = NULL;
+        }
     }
     free((*optLst)->opts);
     (*optLst)->opts = NULL;
