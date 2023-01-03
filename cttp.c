@@ -103,6 +103,18 @@ OptionList* NewOptionList() {
     optlst->size = 8;
     return optlst;
 }
+void OptionListDestructor(OptionList** optLst) {
+    for (size_t i = 0; i < (*optLst)->count; i++) {
+        free((*optLst)->opts[i]->name);
+        free((*optLst)->opts[i]->arg);
+        free((*optLst)->opts[i]);
+        (*optLst)->opts[i] = NULL;
+    }
+    free((*optLst)->opts);
+    (*optLst)->opts = NULL;
+    free(*optLst);
+    *optLst = NULL;
+}
 Data* NewData(const byte* data) {
     const unsigned int dataLen = strlen(data);
     Data* dt = (Data*)malloc(sizeof(Data));

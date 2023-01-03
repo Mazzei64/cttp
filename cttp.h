@@ -116,6 +116,12 @@ extern string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method);
     Contructor method for creating an object of the type OptionList.
 */
 extern OptionList* NewOptionList();
+
+/*
+    Destructor method for creating an object of the type OptionList.
+*/
+extern void OptionListDestructor(OptionList** optLst);
+
 /*
     OptionList method meant for adding a new Option object to the list.
 */
