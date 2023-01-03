@@ -91,7 +91,28 @@ string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method){
     free(headerStr);
     return msgReturn;
 }
+void FreeResponse(Response** response) {
+    if(*response == NULL) return;
+    if((*response)->statusLine != NULL) {
+        free((*response)->statusLine); 
+        (*response)->statusLine = NULL;
+    }
+    if((*response)->responseHeader != NULL)
+        OptionListDestructor(&((*response)->responseHeader));
+
+    if((*response)->body != NULL)
+        DataDestructor(&((*response)->body));
+
+    if((*response)->raw != NULL) {
+        free((*response)->raw);
+        (*response)->raw = NULL;
+        (*response)->resLen = 0;
+    }
+    free(*response);
+    *response = NULL;
+}
 void AddOption(OptionList* optlst, Option* opt) {
+    if(optlst == NULL || opt == NULL) return;
     if(optlst->count == optlst->size)
         optlst->opts = (Option**)realloc(optlst->opts, sizeof(Option*) * (optlst->size + 8));
     optlst->opts[optlst->count] = opt;
@@ -104,6 +125,7 @@ OptionList* NewOptionList() {
     return optlst;
 }
 void OptionListDestructor(OptionList** optLst) {
+    if(*optLst == NULL) return;
     for (size_t i = 0; i < (*optLst)->count; i++) {
         free((*optLst)->opts[i]->name);
         free((*optLst)->opts[i]->arg);
@@ -116,6 +138,7 @@ void OptionListDestructor(OptionList** optLst) {
     *optLst = NULL;
 }
 Data* NewData(const byte* data) {
+    if(data == NULL) return NULL;
     const unsigned int dataLen = strlen(data);
     Data* dt = (Data*)malloc(sizeof(Data));
     dt->data = (byte*)malloc(sizeof(byte) * dataLen);
@@ -124,6 +147,7 @@ Data* NewData(const byte* data) {
     return dt;
 }
 void DataDestructor(Data** data) {
+    if(*data == NULL) return;
     memset((*data)->data, 0x00, (*data)->dataLen);
     free((*data)->data);
     memset(*data, 0x00, sizeof(Data));

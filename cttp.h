@@ -113,6 +113,10 @@ extern Response* CTTP_DELETE(OptionList* opts, URL* url, Data* data, int flag);
 extern string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method);
 
 /*
+    Free Response from Memory.
+*/
+extern void FreeResponse(Response** response);
+/*
     Contructor method for creating an object of the type OptionList.
 */
 extern OptionList* NewOptionList();
