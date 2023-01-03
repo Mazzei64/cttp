@@ -43,6 +43,9 @@
 #define MSG_RECV_TIMEOUT msg_recv_timeout_seconds
 #define MSG_RECV_TIMEOUT_MS msg_recv_timeout_microseconds
 
+#define DEFAULT 0
+#define NORAW 1
+#define RAWONLY 2
 /*
     Defined types
 */
