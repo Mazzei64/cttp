@@ -52,12 +52,13 @@
 typedef unsigned char byte;
 typedef char* string;
 typedef enum { false = 0, true } bool;
+typedef enum { HTTP = 0, HTTPS } http_proto;
 
 /*
     Struct meant for encoding the http address from the url format.
 */
 typedef struct {
-    string proto;
+    http_proto proto;
     string address;
     string route;
     string query;
