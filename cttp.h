@@ -46,8 +46,14 @@
 #define DEFAULT 0
 #define NORAW 1
 #define RAWONLY 2
+
+#define DEFAULT_URL_ROUTE "/"
+#define DEFAULT_URL_ADDRESS "127.0.0.1"
+#define DEFAULT_URL_PORT 80
+#define DEFAULT_URL_VERSION 1.1
+#define DEFAULT_URL_PROTO HTTP
 /*
-    Defined types
+    Defined types" HTTP/"
 */
 typedef unsigned char byte;
 typedef char* string;

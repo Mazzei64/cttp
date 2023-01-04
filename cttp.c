@@ -32,7 +32,28 @@ Response* CTTP_DELETE(OptionList* opts, URL* url, Data* data, int flag) {
     return EncodeResponse(response, flag);
 }
 
-string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method){
+string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method) {
+    char _route[2], _address[10];
+    if(url == NULL) {
+        URL _url;
+        memset(&_url, 0x00, sizeof(URL));
+        url = &_url;
+    }
+    if(url->route == NULL) {
+        memset(_route, 0x00, 2);
+        strncpy(_route, "/", 1);
+        url->route = _route;
+    }
+    if(url->address == NULL) {
+        memset(_address, 0x00, 10);
+        strncpy(_address, DEFAULT_URL_ADDRESS, sizeof(char) * 9);
+        url->address = _address;
+    }
+    if(url->port == 0)
+        url->port = DEFAULT_URL_PORT;
+    if(url->version == 0)
+        url->version = DEFAULT_URL_VERSION;
+    
     string statusLine = SetStatusLine(method, url);
     string headerStr = SetHeader(opts);
     unsigned int reqLen = 0;
