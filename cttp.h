@@ -26,6 +26,7 @@
     Defined macros
 */
 #define getVar(var) #var
+
 #define SET_RES_BUFFER_LEN(new_len) response_buffer_len = new_len
 #define RES_BUFFER_LEN response_buffer_len
 #define SET_CONNECTION_TIMEOUT(timeout) connection_timeout_seconds = timeout
@@ -47,6 +48,8 @@
 #define NORAW 1
 #define RAWONLY 2
 
+#define ERRO_VAL 0x4f525245
+
 #define localhost "127.0.0.1"
 
 #define DEFAULT_URL_ROUTE "/"
@@ -58,7 +61,7 @@
 #define DEFAULT_OPTIONLIST_OPT_NAME "Host"
 #define OPTIONLIST_SIZE default_optionslist_size
 #define SET_OPTIONLIST_SIZE(size) default_optionslist_size = size
-/*s
+/*
     Defined types" HTTP/"
 */
 typedef unsigned char byte;

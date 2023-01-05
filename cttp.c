@@ -81,32 +81,32 @@ string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method) {
 
     int talkRet = talk(sockfd, &addr, (const char*)request, msgReturn, reqLen, RES_BUFFER_LEN);
     if(talkRet == -1) {
-        const string connection_timeout_msg = "Connection failed...\n";
+        const string connection_timeout_msg = "{\"ERROR\":\"Connection failed.\"}\n";
         printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -2) {
-        const string connection_timeout_msg = "Failed to send message...\n";
+        const string connection_timeout_msg = "{\"ERROR\":\"Failed to send message.\"}\n";
         printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -3) {
-        const string connection_timeout_msg = "Failed to read message...\n";
+        const string connection_timeout_msg = "{\"ERROR\":\"Failed to read message.\"}\n";
         printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -4) {
-        const string connection_timeout_msg = "Connection timeout...\n";
+        const string connection_timeout_msg = "{\"ERROR\":\"Connection timeout.\"}\n";
         printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -5) {
-        const string connection_timeout_msg = "Request timeout...\n";
+        const string connection_timeout_msg = "{\"ERROR\":\"Request timeout.\"}\n";
         printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -6) {
-        const string connection_timeout_msg = "[LOG]Response timeout...\n";
+        const string connection_timeout_msg = "{\"ERROR\":\"Response timeout.\"}\n";
         printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
@@ -272,6 +272,13 @@ static void EncodeBody(Data** body, string response, int* count) {
 static Response* EncodeResponse(string response, int flag) {
     int count = 0;
     Response* res = (Response*)calloc(1, sizeof(Response));
+    if(*((unsigned int*)&response[2]) == ERRO_VAL) {
+        res->body = (Data*)calloc(1, sizeof(Data));
+        res->body->dataLen = strlen(response);
+        res->body->data = (string)malloc(sizeof(char) * res->body->dataLen);
+        strncpy(res->body->data, response, res->body->dataLen);
+        return res;
+    }
     if(flag == DEFAULT){
         EncodeStatusLine(&res->statusLine, response, &count);
         EncodeResHeader(&res->responseHeader, response, &count);
