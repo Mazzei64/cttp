@@ -133,8 +133,10 @@ void FreeResponse(Response** response) {
 }
 void AddOption(OptionList* optlst, Option* opt) {
     if(optlst == NULL || opt == NULL) return;
-    if(optlst->count == optlst->size)
-        optlst->opts = (Option**)realloc(optlst->opts, sizeof(Option*) * (optlst->size + 8));
+    if(optlst->count == optlst->size) {
+        optlst->size += 8;
+        optlst->opts = (Option**)realloc(optlst->opts, sizeof(Option*) * optlst->size);
+    }
     optlst->opts[optlst->count] = opt;
     optlst->count = optlst->count + 1;   
 }
