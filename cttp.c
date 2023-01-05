@@ -273,21 +273,31 @@ static Response* EncodeResponse(string response, int flag) {
 } 
 static string SetStatusLine(const string method, URL* url){
     short statusLineLen;
-    char statusLineProto[6];
-    memset(statusLineProto, 0x00, sizeof(char) * 6);
+    char statusLineProto[7];
+    memset(statusLineProto, 0x00, sizeof(char) * 7);
     if(url->proto != HTTP && url->proto != HTTPS) url->proto = HTTP;
     if(url->proto == HTTP) {
         statusLineLen = strlen(method) + 1 + strlen(url->route) + 10;
-        strncpy(statusLineProto, " HTTP/", 5);
+        strncpy(statusLineProto, " HTTP/", 6);
     }
     else if(url->proto == HTTPS) {
         statusLineLen = strlen(method) + 1 + strlen(url->route) + 11;
-        strncpy(statusLineProto, " HTTPS/", 6);
+        strncpy(statusLineProto, " HTTPS/", 7);
     }
-    string statusLine = (string)malloc(sizeof(char) * statusLineLen);
-    memset(statusLine, 0x00, statusLineLen);
-    strcat(statusLine, method);
-    strcat(statusLine, " ");
+    string statusLine;
+    if(url->route[0] != '/') {
+        statusLine++;
+        statusLine = (string)malloc(sizeof(char) * statusLineLen);
+        memset(statusLine, 0x00, statusLineLen);
+        strcat(statusLine, method);
+        strcat(statusLine, " /");
+    }
+    else {
+        statusLine = (string)malloc(sizeof(char) * statusLineLen);
+        memset(statusLine, 0x00, statusLineLen);
+        strcat(statusLine, method);
+        strcat(statusLine, " ");
+    }
     strcat(statusLine, url->route);
     strcat(statusLine, statusLineProto);
     char versionCntrl[5];

@@ -47,6 +47,8 @@
 #define NORAW 1
 #define RAWONLY 2
 
+#define localhost "127.0.0.1"
+
 #define DEFAULT_URL_ROUTE "/"
 #define DEFAULT_URL_ADDRESS "127.0.0.1"
 #define DEFAULT_URL_PORT 80
