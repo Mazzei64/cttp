@@ -54,7 +54,11 @@
 #define DEFAULT_URL_PORT 80
 #define DEFAULT_URL_VERSION 1.1
 #define DEFAULT_URL_PROTO HTTP
-/*
+
+#define DEFAULT_OPTIONLIST_OPT_NAME "Host"
+#define OPTIONLIST_SIZE default_optionslist_size
+#define SET_OPTIONLIST_SIZE(size) default_optionslist_size = size
+/*s
     Defined types" HTTP/"
 */
 typedef unsigned char byte;
@@ -152,9 +156,14 @@ extern void AddOptions(OptionList* optlst, Option* optsArray, int count);
 extern Data* NewData(const byte* data);
 
 /*
-    Constructor method for creating an object of the type Data.
+    Desturctor method for freeing an object of the type Data.
 */
 extern void DataDestructor(Data** data);
+
+/*
+    Destructor method for freeing an object of the type URL.
+*/
+extern void UrlDestructor(URL** url);
 
 /*
     Default data variables.
@@ -167,5 +176,7 @@ static unsigned short msg_send_timeout_seconds = 5;
 static unsigned int msg_send_timeout_microseconds = 0;
 static unsigned short msg_recv_timeout_seconds = 5;
 static unsigned int msg_recv_timeout_microseconds = 0;
+
+static unsigned int default_optionslist_size = 8;
 
 #endif

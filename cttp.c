@@ -11,6 +11,11 @@ static string SetStatusLine(const string method, URL* url);
 static string SetHeader(OptionList* opts);
 static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, char *restrict recvMsg,  int sendLen, int recvLen);
 
+/* Filters */
+static void UrlFilter(URL** url, string _route, string _address, bool* urlNew);
+static void OptsListFilter(OptionList** opts, Option* option, string address, int addressLen, bool* newOptsLst);
+static void FreeDefaultedMem(URL* url, OptionList* opts, bool* new);
+
 Response* CTTP_GET(OptionList* opts, URL* url, Data* data, int flag) {
     static const string method = "GET";
     string response = CTTP_REQ(opts, url, data, method);
@@ -32,35 +37,30 @@ Response* CTTP_DELETE(OptionList* opts, URL* url, Data* data, int flag) {
     return EncodeResponse(response, flag);
 }
 
+
 string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method) {
+    #define URL_I 0
+    #define OPTSLIST_I 1
+
     char _route[2], _address[10];
-    if(url == NULL) {
-        URL _url;
-        memset(&_url, 0x00, sizeof(URL));
-        url = &_url;
-    }
-    if(url->route == NULL) {
-        memset(_route, 0x00, 2);
-        strncpy(_route, "/", 1);
-        url->route = _route;
-    }
-    if(url->address == NULL) {
-        memset(_address, 0x00, 10);
-        strncpy(_address, DEFAULT_URL_ADDRESS, sizeof(char) * 9);
-        url->address = _address;
-    }
-    if(url->port == 0)
-        url->port = DEFAULT_URL_PORT;
-    if(url->version == 0)
-        url->version = DEFAULT_URL_VERSION;
+    memset(_route, 0x00, 2);
+    memset(_address, 0x00, 10);
+    bool new[2] = { false, false };
+
+    UrlFilter(&url, _route, _address, &new[URL_I]);
     
+    int addressLen = strlen(url->address);
+    Option option;
+    option.name = (string)malloc(sizeof(char) * 4);
+    option.arg = (string)malloc(sizeof(char) * addressLen);
+
+    OptsListFilter(&opts, &option, url->address, addressLen, &new[OPTSLIST_I]);
+
     string statusLine = SetStatusLine(method, url);
     string headerStr = SetHeader(opts);
-    unsigned int reqLen = 0;
-    if(data != NULL)
-       reqLen = strlen(statusLine) + strlen(headerStr) + data->dataLen;
-    else
-        reqLen = strlen(statusLine) + strlen(headerStr);
+
+    unsigned int reqLen = data != NULL ? strlen(statusLine) + strlen(headerStr) + data->dataLen : 
+                                            strlen(statusLine) + strlen(headerStr);
 
     char request[reqLen];
     memset(request, 0x00, reqLen);
@@ -75,6 +75,10 @@ string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method) {
     addr.sin_port = htons(url->port);
     addr.sin_addr.s_addr = inet_addr(url->address);
     
+    free(option.arg);
+    free(option.name);
+    FreeDefaultedMem(url, opts, new);
+
     int talkRet = talk(sockfd, &addr, (const char*)request, msgReturn, reqLen, RES_BUFFER_LEN);
     if(talkRet == -1) {
         const string connection_timeout_msg = "Connection failed...\n";
@@ -134,7 +138,7 @@ void FreeResponse(Response** response) {
 void AddOption(OptionList* optlst, Option* opt) {
     if(optlst == NULL || opt == NULL) return;
     if(optlst->count == optlst->size) {
-        optlst->size += 8;
+        optlst->size += OPTIONLIST_SIZE;
         optlst->opts = (Option**)realloc(optlst->opts, sizeof(Option*) * optlst->size);
     }
     optlst->opts[optlst->count] = opt;
@@ -147,8 +151,8 @@ void AddOptions(OptionList* optlst, Option* optsArray, int count) {
 }
 OptionList* NewOptionList() {
     OptionList* optlst = (OptionList*)calloc(1, sizeof(OptionList));
-    optlst->opts = (Option**)calloc(8, sizeof(Option*));
-    optlst->size = 8;
+    optlst->opts = (Option**)calloc(OPTIONLIST_SIZE, sizeof(Option*));
+    optlst->size = OPTIONLIST_SIZE;
     return optlst;
 }
 void OptionListDestructor(OptionList** optLst) {
@@ -184,6 +188,22 @@ void DataDestructor(Data** data) {
     free(*data);
     (*data) = NULL;
 }
+void UrlDestructor(URL** url) {
+    if(*url == NULL) return;
+    register unsigned long int _rsp asm ("rsp");
+    memset((*url)->address, 0x00, strlen((*url)->address));
+    memset((*url)->route, 0x00, strlen((*url)->route));
+    if((*url)->query != NULL) {
+        memset((*url)->query, 0x00, strlen((*url)->query));
+        free((*url)->query);
+    }
+    if((unsigned long int)(*url)->address < _rsp) {
+        free((*url)->address);
+        free((*url)->route);
+    }
+    memset(*url, 0x00, sizeof(URL));
+    free(*url);
+}
 /* Auxiliary Functions */
 static void EncodeStatusLine(string* statusLine, string response, int* count) {
     while (response[*count] != '\n') (*count)++;
@@ -215,7 +235,7 @@ static void EncodeResHeader(OptionList** optLst, string response, int* count) {
     memset(headerOptBuffer, 0x00, 1024);
     *optLst = (OptionList*)calloc(1, sizeof(OptionList));
     for(;;){
-        while (response[*count] != '\n') {
+        while (response[*count] != '\n' && response[*count] != '\0') {
             headerOptBuffer[lineLen] = response[*count];
             lineLen++;
             (*count)++;
@@ -260,12 +280,12 @@ static Response* EncodeResponse(string response, int flag) {
         strncpy(res->raw, response, count);
         res->resLen = count;
     }
-    else  if(flag == NORAW) {
+    else if(flag == NORAW) {
         EncodeStatusLine(&res->statusLine, response, &count);
         EncodeResHeader(&res->responseHeader, response, &count);
         EncodeBody(&res->body, response, &count);
     }
-    else  if(flag == RAWONLY) {
+    else if(flag == RAWONLY) {
         count = strlen(response);
         res->raw = (string)malloc(sizeof(char) * count);
         strncpy(res->raw, response, count);
@@ -367,4 +387,51 @@ static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, 
     }
     setitimer(ITIMER_REAL, &oldtimer, NULL);
     return 0;
+}
+static void UrlFilter(URL** url, string _route, string _address, bool* urlNew) {
+    if(*url == NULL) {
+        *url = (URL*)calloc(1, sizeof(URL));
+        urlNew[0] = true;
+    }
+    if((*url)->route == NULL) {
+        memset(_route, 0x00, 2);
+        strncpy(_route, "/", 1);
+        (*url)->route = _route;
+    }
+    if((*url)->address == NULL) {
+        memset(_address, 0x00, 10);
+        strncpy(_address, DEFAULT_URL_ADDRESS, sizeof(char) * 9);
+        (*url)->address = _address;
+    }
+    if((*url)->port == 0)
+        (*url)->port = DEFAULT_URL_PORT;
+    if((*url)->version == 0)
+        (*url)->version = DEFAULT_URL_VERSION;
+}
+static void OptsListFilter(OptionList** opts, Option* option, string address, int addressLen, bool* newOptsLst) {
+    if(*opts == NULL){
+        *opts = (OptionList*)calloc(1, sizeof(OptionList));
+        newOptsLst[1] = true;
+    }
+    if((*opts)->opts == NULL) {
+        strncpy(option->name, DEFAULT_OPTIONLIST_OPT_NAME, 4);
+        strncpy(option->arg, address, addressLen);
+        AddOption(*opts, option);
+    }
+}
+static void FreeDefaultedMem(URL* url, OptionList* opts, bool* new) {
+    if(new[0] == false && new[1] == false) return;
+    if(new[0] == true && new[1] == true) {
+        UrlDestructor(&url);
+        OptionListDestructor(&opts);
+        return;
+    }
+    if(new[0] == true) {
+        UrlDestructor(&url);
+        return;
+    }
+    if(new[1] == true) {
+        OptionListDestructor(&opts);
+        return;
+    }
 }
