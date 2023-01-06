@@ -6,10 +6,12 @@ static void EncodeStatusLine(string* statusLine, string response, int* count);
 static void StringToOption(Option** opt, string optStr);
 static void EncodeResHeader(OptionList** optLst, string response, int* count);
 static void EncodeBody(Data** body, string response, int* count);
+static void FilterErrorResponse(Response* res, string response);
 static Response* EncodeResponse(string response, int flag);
 static string SetStatusLine(const string method, URL* url);
 static string SetHeader(OptionList* opts);
 static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, char *restrict recvMsg,  int sendLen, int recvLen);
+static string ittoa(unsigned int val);
 
 /* Filters */
 static void UrlFilter(URL** url, string _route, string _address, bool* urlNew);
@@ -82,32 +84,26 @@ string CTTP_REQ(OptionList* opts, URL* url, Data* data, string method) {
     int talkRet = talk(sockfd, &addr, (const char*)request, msgReturn, reqLen, RES_BUFFER_LEN);
     if(talkRet == -1) {
         const string connection_timeout_msg = "{\"ERROR\":\"Connection failed.\"}\n";
-        printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -2) {
         const string connection_timeout_msg = "{\"ERROR\":\"Failed to send message.\"}\n";
-        printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -3) {
         const string connection_timeout_msg = "{\"ERROR\":\"Failed to read message.\"}\n";
-        printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -4) {
         const string connection_timeout_msg = "{\"ERROR\":\"Connection timeout.\"}\n";
-        printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -5) {
         const string connection_timeout_msg = "{\"ERROR\":\"Request timeout.\"}\n";
-        printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }else if (talkRet == -6) {
         const string connection_timeout_msg = "{\"ERROR\":\"Response timeout.\"}\n";
-        printf("[LOG]%s", connection_timeout_msg);
         strcpy(msgReturn, connection_timeout_msg);
         return msgReturn;
     }   
@@ -178,12 +174,15 @@ Data* NewData(const byte* data) {
     dt->data = (byte*)malloc(sizeof(byte) * dataLen);
     strcpy(dt->data, data);
     dt->dataLen = dataLen;
+    dt->sdataLen = ittoa(dataLen);
     return dt;
 }
 void DataDestructor(Data** data) {
     if(*data == NULL) return;
     memset((*data)->data, 0x00, (*data)->dataLen);
     free((*data)->data);
+    free((*data)->sdataLen);
+    memset((*data)->sdataLen, 0x00, strlen((*data)->sdataLen));
     memset(*data, 0x00, sizeof(Data));
     free(*data);
     (*data) = NULL;
@@ -269,17 +268,20 @@ static void EncodeBody(Data** body, string response, int* count) {
     }
     (*body)->dataLen = dataIndex + 1;
 }
-static Response* EncodeResponse(string response, int flag) {
-    int count = 0;
-    Response* res = (Response*)calloc(1, sizeof(Response));
+static void FilterErrorResponse(Response* res, string response) {
     if(*((unsigned int*)&response[2]) == ERRO_VAL) {
         res->body = (Data*)calloc(1, sizeof(Data));
         res->body->dataLen = strlen(response);
+        res->body->sdataLen = ittoa(res->body->dataLen);
         res->body->data = (string)malloc(sizeof(char) * res->body->dataLen);
         strncpy(res->body->data, response, res->body->dataLen);
-        return res;
     }
+}
+static Response* EncodeResponse(string response, int flag) {
+    int count = 0;
+    Response* res = (Response*)calloc(1, sizeof(Response));
     if(flag == DEFAULT){
+        FilterErrorResponse(res, response);
         EncodeStatusLine(&res->statusLine, response, &count);
         EncodeResHeader(&res->responseHeader, response, &count);
         EncodeBody(&(res->body), response, &count);
@@ -288,11 +290,13 @@ static Response* EncodeResponse(string response, int flag) {
         res->resLen = count;
     }
     else if(flag == NORAW) {
+        FilterErrorResponse(res, response);
         EncodeStatusLine(&res->statusLine, response, &count);
         EncodeResHeader(&res->responseHeader, response, &count);
         EncodeBody(&res->body, response, &count);
     }
     else if(flag == RAWONLY) {
+        FilterErrorResponse(res, response);
         count = strlen(response);
         res->raw = (string)malloc(sizeof(char) * count);
         strncpy(res->raw, response, count);
@@ -441,4 +445,43 @@ static void FreeDefaultedMem(URL* url, OptionList* opts, bool* new) {
         OptionListDestructor(&opts);
         return;
     }
+}
+static string ittoa(unsigned int val) {
+    string strVal = (string)malloc(sizeof(char) * 5);
+    int digits[5];
+    memset(strVal, 0x00, sizeof(strVal));
+    memset(digits, 0x00, sizeof(digits));
+
+    if((digits[0] = val / 1000) >= 1) {
+        strVal[0] = digits[0] + 0x30;
+
+        digits[1] = (val - (digits[0] * 1000)) / 100;
+        strVal[1] = digits[1] + 0x30;
+
+        digits[2] = (val - (digits[0] * 1000 + digits[1] * 100 )) / 10;
+        strVal[2] = digits[2] + 0x30;
+
+        digits[3] = val - (digits[0] * 1000 + digits[1] * 100 + digits[2] * 10);
+        strVal[3] = digits[3] + 0x30;
+    }
+    else if((digits[0] = val / 100) >= 1) {
+        strVal[0] = digits[0] + 0x30;
+
+        digits[1] = (val - (digits[0] * 100)) / 10;
+        strVal[1] = digits[1] + 0x30;
+
+        digits[2] = val - (digits[0] * 100 + digits[1] * 10 );
+        strVal[2] = digits[2] + 0x30;
+    }
+    else if((digits[0] = val / 10) >= 1) {
+        strVal[0] = digits[0] + 0x30;
+
+        digits[1] = (val - (digits[0] * 100)) / 10;
+        strVal[1] = digits[1] + 0x30;
+    }
+    else if((digits[0] = val) >= 1) {
+        strVal[0] = digits[0] + 0x30;
+    }
+
+    return strVal; 
 }

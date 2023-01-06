@@ -103,6 +103,7 @@ typedef struct {
 */
 typedef struct {
     byte* data;
+    string sdataLen;
     unsigned long int dataLen;
 } Data;
 
