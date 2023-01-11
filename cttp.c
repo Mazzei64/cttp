@@ -1,6 +1,7 @@
 #include"cttp.h"
 
 static bool timeout = false;
+static bool error_flag = false;
 
 static void EncodeStatusLine(string* statusLine, string response, int* count);
 static void StringToOption(Option** opt, string optStr);
@@ -241,7 +242,7 @@ static void EncodeResHeader(OptionList** optLst, string response, int* count) {
         }
         headerOptBuffer[lineLen] = response[*count];
         (*count)++;
-        Option* option = (Option*)malloc(sizeof(Option));
+        Option* option = (Option*)calloc(1 ,sizeof(Option));
         StringToOption(&option, headerOptBuffer);
         AddOption(*optLst, option);
         memset(headerOptBuffer, 0x00, 1024);
@@ -276,12 +277,17 @@ static void FilterErrorResponse(Response* res, string response) {
         res->body->data = (string)malloc(sizeof(char) * res->body->dataLen);
         strncpy(res->body->data, response, res->body->dataLen);
     }
+<<<<<<< Updated upstream
+=======
+    error_flag = true;
+>>>>>>> Stashed changes
 }
 static Response* EncodeResponse(string response, int flag) {
     int count = 0;
     Response* res = (Response*)calloc(1, sizeof(Response));
     if(flag == DEFAULT){
         FilterErrorResponse(res, response);
+<<<<<<< Updated upstream
         EncodeStatusLine(&res->statusLine, response, &count);
         EncodeResHeader(&res->responseHeader, response, &count);
         EncodeBody(&(res->body), response, &count);
@@ -294,6 +300,29 @@ static Response* EncodeResponse(string response, int flag) {
         EncodeStatusLine(&res->statusLine, response, &count);
         EncodeResHeader(&res->responseHeader, response, &count);
         EncodeBody(&res->body, response, &count);
+=======
+        if(error_flag == false) {
+            EncodeStatusLine(&res->statusLine, response, &count);
+            EncodeResHeader(&res->responseHeader, response, &count);
+            EncodeBody(&(res->body), response, &count);
+        }
+        else {
+            res->raw = (string)malloc(sizeof(char) * count);
+            strncpy(res->raw, response, count);
+            res->resLen = count;
+            error_flag = false;
+        }
+    }
+    else if(flag == NORAW) {
+        FilterErrorResponse(res, response);
+        if(error_flag == false) {
+            EncodeStatusLine(&res->statusLine, response, &count);
+            EncodeResHeader(&res->responseHeader, response, &count);
+            EncodeBody(&res->body, response, &count);
+        }
+        else
+            error_flag = false;
+>>>>>>> Stashed changes
     }
     else if(flag == RAWONLY) {
         FilterErrorResponse(res, response);
@@ -318,6 +347,7 @@ static string SetStatusLine(const string method, URL* url){
         strncpy(statusLineProto, " HTTPS/", 7);
     }
     string statusLine;
+    // if query != NULL concat query separated by ?
     if(url->route[0] != '/') {
         statusLine++;
         statusLine = (string)malloc(sizeof(char) * statusLineLen);
@@ -369,14 +399,14 @@ static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, 
     sigaction(SIGALRM, &handler, 0);
     timer.it_value.tv_sec = CONNECTION_TIMEOUT;
     timer.it_value.tv_usec = CONNECTION_TIMEOUT_MS;
-    printf("[LOG]Attempting connnection with: %s\n", inet_ntoa(addr->sin_addr));
+    // printf("[LOG]Attempting connnection with: %s\n", inet_ntoa(addr->sin_addr));
     setitimer(ITIMER_REAL, &timer, &oldtimer);
     int connected;
     if((connected = connect(sockfd, (const struct sockaddr*)addr, (socklen_t)sizeof(struct sockaddr_in))) == -1) {
         if(timeout == true) return -4;
         return -1;
     }
-    printf("[LOG]Connection established with success.\n");
+    // printf("[LOG]Connection established with success.\n");
     setitimer(ITIMER_REAL, &oldtimer, NULL);
     timer.it_value.tv_sec = MSG_SEND_TIMEOUT;
     timer.it_value.tv_usec = MSG_SEND_TIMEOUT_MS;
@@ -386,7 +416,7 @@ static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, 
         if(timeout == true) return -5;
         return -2;
     }
-    printf("[LOG]Message sent with num of bytes: %d\n", sendBytes);
+    // printf("[LOG]Message sent with num of bytes: %d\n", sendBytes);
     setitimer(ITIMER_REAL, &oldtimer, NULL);
     timer.it_value.tv_sec = MSG_RECV_TIMEOUT;
     timer.it_value.tv_usec = MSG_RECV_TIMEOUT_MS;
@@ -449,9 +479,16 @@ static void FreeDefaultedMem(URL* url, OptionList* opts, bool* new) {
 static string ittoa(unsigned int val) {
     string strVal = (string)malloc(sizeof(char) * 5);
     int digits[5];
+<<<<<<< Updated upstream
     memset(strVal, 0x00, sizeof(strVal));
     memset(digits, 0x00, sizeof(digits));
 
+=======
+    memset(strVal, 0x00, 5);
+    memset(digits, 0x00, 5);
+
+    if(val > 10000) return NULL;
+>>>>>>> Stashed changes
     if((digits[0] = val / 1000) >= 1) {
         strVal[0] = digits[0] + 0x30;
 
@@ -476,7 +513,11 @@ static string ittoa(unsigned int val) {
     else if((digits[0] = val / 10) >= 1) {
         strVal[0] = digits[0] + 0x30;
 
+<<<<<<< Updated upstream
         digits[1] = (val - (digits[0] * 100)) / 10;
+=======
+        digits[1] = val - (digits[0] * 10);
+>>>>>>> Stashed changes
         strVal[1] = digits[1] + 0x30;
     }
     else if((digits[0] = val) >= 1) {
