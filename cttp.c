@@ -1,7 +1,6 @@
 #include"cttp.h"
 
 static bool timeout = false;
-static bool error_flag = false;
 
 static void EncodeStatusLine(string* statusLine, string response, int* count);
 static void StringToOption(Option** opt, string optStr);
@@ -36,6 +35,11 @@ Response* CTTP_PUT(OptionList* opts, URL* url, Data* data, int flag) {
 }
 Response* CTTP_DELETE(OptionList* opts, URL* url, Data* data, int flag) {
     static const string method = "DELETE";
+    string response = CTTP_REQ(opts, url, data, method);
+    return EncodeResponse(response, flag);
+}
+Response* CTTP_OPTIONS(OptionList* opts, URL* url, Data* data, int flag) {
+    static const string method = "OPTIONS";
     string response = CTTP_REQ(opts, url, data, method);
     return EncodeResponse(response, flag);
 }
@@ -180,10 +184,13 @@ Data* NewData(const byte* data) {
 }
 void DataDestructor(Data** data) {
     if(*data == NULL) return;
+    // unsigned long int dataLen = (*data)->dataLen;
     memset((*data)->data, 0x00, (*data)->dataLen);
     free((*data)->data);
-    free((*data)->sdataLen);
-    memset((*data)->sdataLen, 0x00, strlen((*data)->sdataLen));
+    if((*data)->sdataLen != NULL) {
+        memset((*data)->sdataLen, 0x00, strlen((*data)->sdataLen));
+        free((*data)->sdataLen);
+    }
     memset(*data, 0x00, sizeof(Data));
     free(*data);
     (*data) = NULL;
@@ -269,60 +276,38 @@ static void EncodeBody(Data** body, string response, int* count) {
     }
     (*body)->dataLen = dataIndex + 1;
 }
-static void FilterErrorResponse(Response* res, string response) {
+static bool FilterErrorResponse(Response* res, string response) {
     if(*((unsigned int*)&response[2]) == ERRO_VAL) {
         res->body = (Data*)calloc(1, sizeof(Data));
         res->body->dataLen = strlen(response);
         res->body->sdataLen = ittoa(res->body->dataLen);
         res->body->data = (string)malloc(sizeof(char) * res->body->dataLen);
         strncpy(res->body->data, response, res->body->dataLen);
+        return true;
     }
-<<<<<<< Updated upstream
-=======
-    error_flag = true;
->>>>>>> Stashed changes
+    return false;
 }
 static Response* EncodeResponse(string response, int flag) {
     int count = 0;
     Response* res = (Response*)calloc(1, sizeof(Response));
     if(flag == DEFAULT){
-        FilterErrorResponse(res, response);
-<<<<<<< Updated upstream
-        EncodeStatusLine(&res->statusLine, response, &count);
-        EncodeResHeader(&res->responseHeader, response, &count);
-        EncodeBody(&(res->body), response, &count);
-        res->raw = (string)malloc(sizeof(char) * count);
-        strncpy(res->raw, response, count);
-        res->resLen = count;
-    }
-    else if(flag == NORAW) {
-        FilterErrorResponse(res, response);
-        EncodeStatusLine(&res->statusLine, response, &count);
-        EncodeResHeader(&res->responseHeader, response, &count);
-        EncodeBody(&res->body, response, &count);
-=======
-        if(error_flag == false) {
+        if(FilterErrorResponse(res, response) == false) {
             EncodeStatusLine(&res->statusLine, response, &count);
             EncodeResHeader(&res->responseHeader, response, &count);
             EncodeBody(&(res->body), response, &count);
+            return res;
         }
-        else {
-            res->raw = (string)malloc(sizeof(char) * count);
-            strncpy(res->raw, response, count);
-            res->resLen = count;
-            error_flag = false;
-        }
+        res->raw = (string)malloc(sizeof(char) * count);
+        strncpy(res->raw, response, count);
+        res->resLen = count;
+        error_flag = false;
     }
     else if(flag == NORAW) {
-        FilterErrorResponse(res, response);
-        if(error_flag == false) {
+        if(FilterErrorResponse(res, response) == false) {
             EncodeStatusLine(&res->statusLine, response, &count);
             EncodeResHeader(&res->responseHeader, response, &count);
             EncodeBody(&res->body, response, &count);
         }
-        else
-            error_flag = false;
->>>>>>> Stashed changes
     }
     else if(flag == RAWONLY) {
         FilterErrorResponse(res, response);
@@ -339,29 +324,33 @@ static string SetStatusLine(const string method, URL* url){
     memset(statusLineProto, 0x00, sizeof(char) * 7);
     if(url->proto != HTTP && url->proto != HTTPS) url->proto = HTTP;
     if(url->proto == HTTP) {
-        statusLineLen = strlen(method) + 1 + strlen(url->route) + 10;
+        statusLineLen = url->query == NULL ? strlen(method) + 1 + strlen(url->route) + 10 : 
+                                                strlen(method) + 1 + strlen(url->route) + 10 + strlen(url->query);
         strncpy(statusLineProto, " HTTP/", 6);
     }
     else if(url->proto == HTTPS) {
-        statusLineLen = strlen(method) + 1 + strlen(url->route) + 11;
+        statusLineLen = url->query == NULL ? strlen(method) + 1 + strlen(url->route) + 11 : 
+                                                strlen(method) + 1 + strlen(url->route) + 11 + strlen(url->query);
         strncpy(statusLineProto, " HTTPS/", 7);
     }
     string statusLine;
     // if query != NULL concat query separated by ?
     if(url->route[0] != '/') {
-        statusLine++;
-        statusLine = (string)malloc(sizeof(char) * statusLineLen);
-        memset(statusLine, 0x00, statusLineLen);
+        statusLineLen++;
+        statusLine = (string)calloc(statusLineLen ,sizeof(char));
         strcat(statusLine, method);
         strcat(statusLine, " /");
     }
     else {
-        statusLine = (string)malloc(sizeof(char) * statusLineLen);
-        memset(statusLine, 0x00, statusLineLen);
+        statusLine = (string)calloc(statusLineLen ,sizeof(char));
         strcat(statusLine, method);
         strcat(statusLine, " ");
     }
     strcat(statusLine, url->route);
+    if(url->query != NULL) {
+        strcat(statusLine, "?");
+        strcat(statusLine, url->query);
+    }
     strcat(statusLine, statusLineProto);
     char versionCntrl[5];
     memset(versionCntrl, 0x00, 5);
@@ -422,7 +411,7 @@ static int talk(int sockfd, const struct sockaddr_in* addr,const char* sendMsg, 
     timer.it_value.tv_usec = MSG_RECV_TIMEOUT_MS;
     setitimer(ITIMER_REAL, &timer, &oldtimer);
     int readBytes = 0;
-    if(read(sockfd, recvMsg, recvLen) <= 0) {
+    if((readBytes = read(sockfd, recvMsg, recvLen)) <= 0) {
         if(timeout == true) return -6;
         return -3;
     }
@@ -479,16 +468,10 @@ static void FreeDefaultedMem(URL* url, OptionList* opts, bool* new) {
 static string ittoa(unsigned int val) {
     string strVal = (string)malloc(sizeof(char) * 5);
     int digits[5];
-<<<<<<< Updated upstream
-    memset(strVal, 0x00, sizeof(strVal));
-    memset(digits, 0x00, sizeof(digits));
-
-=======
     memset(strVal, 0x00, 5);
     memset(digits, 0x00, 5);
 
     if(val > 10000) return NULL;
->>>>>>> Stashed changes
     if((digits[0] = val / 1000) >= 1) {
         strVal[0] = digits[0] + 0x30;
 
@@ -513,11 +496,7 @@ static string ittoa(unsigned int val) {
     else if((digits[0] = val / 10) >= 1) {
         strVal[0] = digits[0] + 0x30;
 
-<<<<<<< Updated upstream
-        digits[1] = (val - (digits[0] * 100)) / 10;
-=======
         digits[1] = val - (digits[0] * 10);
->>>>>>> Stashed changes
         strVal[1] = digits[1] + 0x30;
     }
     else if((digits[0] = val) >= 1) {
